@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eastern Edge Profiler Control Panel</title>
+    <style>
+        body {background-color: #323232; color: #fff; font-family: monospace;}
+        div.console {background-color: #222; width: 50%; height: 512px; border-radius: 12px; overflow: auto}
+        div.console p{text-align: left; font-family: monospace; font-weight: normal; margin-left: 8px; margin-top: 4px; white-space: pre-line;}
+        button{font-size: 2em; width: 50%; font-weight: bold; border-radius: 8px; padding: 14px 24px; border: none; background: #f00; color: #fff; cursor:pointer;}
+        button:active{background-color: #ee0000;}
+    </style>
+    <script src="dygraph.min.js"></script>
+    <script src="jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            let data = [];
+            let g = new Dygraph(document.getElementById("chart"), data, {drawPoints: true, showRoller: true, labels: ['Time', 'Depth']});
+            setInterval(function() {
+                $.get("/logs", function(data) {
+                    let tmp = $(".console")[0].scrollTop + $(".console")[0].clientHeight === $(".console")[0].scrollHeight;
+                    $("#logs").text(data);
+                    if (tmp) $(".console")[0].scrollTop = $(".console")[0].scrollHeight;
+                });
+                $.get("/data", function(dot){ data = dot; });
+                g.updateOptions( { 'file': data } );
+            }, 1000);
+        }
+        );
+    </script>
+</head>
+<body>
+    <h1 style="margin-top: 0;">Eastern Edge Profiler Control Panel</h1>
+    <button onclick="$.get('/start')">LAUNCH</button>
+    <div class="console">
+        <pre id="logs"></pre>
+    </div>
+    <div id="chart" style="position: absolute; right: 0; top: 5%; height: 80%; width: 45%"></div>
+</body>
+</html>
